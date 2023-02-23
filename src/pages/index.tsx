@@ -5,12 +5,14 @@ import CanvasLayout from "../components/layout/CanvasLayout";
 import DomLayout from "../components/layout/DomLayout";
 import WelcomeMessage from "../components/dom/WelcomeMessage";
 import Box from "../components/canvas/Box";
+import AudioComponent from "../components/AudioComponent";
 
 // dom components go here
 const DOM = () => {
     return (
         <DomLayout>
             <WelcomeMessage />
+            <AudioComponent />
         </DomLayout>
     );
 };
