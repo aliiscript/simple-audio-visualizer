@@ -1,18 +1,19 @@
 import type { NextPage } from "next";
 import styled from "styled-components";
 import { useControls } from "leva";
+import { useState } from "react";
 import CanvasLayout from "../components/layout/CanvasLayout";
 import DomLayout from "../components/layout/DomLayout";
-import WelcomeMessage from "../components/dom/WelcomeMessage";
 import Box from "../components/canvas/Box";
 import AudioComponent from "../components/AudioComponent";
+import Overlay from "../dom/Overlay";
 
 // dom components go here
-const DOM = () => {
+const DOM = ({ ready, set }: any) => {
     return (
         <DomLayout>
-            <WelcomeMessage />
             <AudioComponent />
+            <Overlay ready={ready} set={set} />
         </DomLayout>
     );
 };
@@ -36,10 +37,12 @@ const R3F = () => {
 };
 
 const Home: NextPage = () => {
+    const [ready, set] = useState(false);
+
     return (
         <>
-            <DOM />
-            <R3F />
+            {ready && <R3F />}
+            <DOM ready={ready} set={set} />
         </>
     );
 };
