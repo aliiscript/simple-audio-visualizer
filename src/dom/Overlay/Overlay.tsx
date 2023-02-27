@@ -1,11 +1,12 @@
-
 import * as React from "react";
 import styled from "styled-components";
+import styles from "./Overlay.module.css";
+
 function Overlay({ ready, set }: any) {
     return (
         <FullscreenDiv style={{ display: ready ? "none" : "flex" }}>
             <CenterDiv>
-                <StyledH1>Start</StyledH1>
+                <StyledH1>Start Visualizer</StyledH1>
                 <button style={{ cursor: "hand" }} onClick={() => set(true)}>
                     ▶️
                 </button>
@@ -33,9 +34,10 @@ const CenterDiv = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-`;  
+`;
 
 const StyledH1 = styled.h1`
+    color: #e8d6cb;
     font-size: 2rem;
 `;
 
