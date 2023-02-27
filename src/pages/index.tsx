@@ -6,14 +6,15 @@ import CanvasLayout from "../components/layout/CanvasLayout";
 import DomLayout from "../components/layout/DomLayout";
 import Box from "../components/canvas/Box";
 import AudioComponent from "../components/AudioComponent";
-import Overlay from "../dom/Overlay";
+import Overlay from "../components/dom/Overlay";
+import Wave from "../components/canvas/Wave";
 
 // dom components go here
 const DOM = ({ ready, set }: any) => {
     return (
         <DomLayout>
             <AudioComponent />
-            <Overlay ready={ready} set={set} />
+            {/* <Overlay ready={ready} set={set} /> */}
         </DomLayout>
     );
 };
@@ -32,6 +33,7 @@ const R3F = () => {
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
             <Box color={color} hoverColor={hoverColor} />
+            <Wave />
         </CanvasLayout>
     );
 };
@@ -39,9 +41,10 @@ const R3F = () => {
 const Home: NextPage = () => {
     const [ready, set] = useState(false);
 
+    // set true while i implement visualier
     return (
         <>
-            {ready && <R3F />}
+            {true && <R3F />}
             <DOM ready={ready} set={set} />
         </>
     );
