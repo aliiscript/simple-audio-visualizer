@@ -5,7 +5,6 @@ import { useControls } from "leva";
 import song from "../../audio/icoHeal08.mp3";
 
 function AudioComponent() {
-    const [playState, setPlayState] = useState("stop");
     const [source, setSource] = useState<
         MediaElementAudioSourceNode | undefined
     >(); // specify the type of the state variable
@@ -14,9 +13,6 @@ function AudioComponent() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const audioCtxRef = useRef<AudioContext | null>(null);
     const pannerRef = useRef<StereoPannerNode | null>(null);
-
-    // leva controls
-  
 
     // useEffect in Nextjs is client side
     useEffect(() => {
@@ -44,7 +40,7 @@ function AudioComponent() {
     }, []);
 
     const handlePanChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if(pannerRef.current) {
+        if (pannerRef.current) {
             setPanValue(Number(event.target.value));
             pannerRef.current.pan.value = Number(event.target.value);
         }

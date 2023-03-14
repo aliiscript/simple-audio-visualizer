@@ -4,7 +4,6 @@ import { useControls } from "leva";
 import { useState } from "react";
 import CanvasLayout from "../components/layout/CanvasLayout";
 import DomLayout from "../components/layout/DomLayout";
-import Box from "../components/canvas/Box";
 import AudioComponent from "../components/AudioComponent";
 import Overlay from "../components/dom/Overlay";
 import Wave from "../components/canvas/Wave";
@@ -32,7 +31,6 @@ const R3F = () => {
         <CanvasLayout>
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
-            <Box color={color} hoverColor={hoverColor} />
             <Wave />
         </CanvasLayout>
     );
