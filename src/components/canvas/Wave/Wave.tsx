@@ -55,7 +55,9 @@ function Wave() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const audioCtxRef = useRef<AudioContext | null>(null);
     const pannerRef = useRef<StereoPannerNode | null>(null);
-    const analyzerRef = useRef<AnalyserNode | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+
+    const dataArr = useRef<any>(null);
 
     const waveMaterial = useRef<ShaderMaterial>(null);
     const waveMaterial2 = useRef<ShaderMaterial>(null);
@@ -81,6 +83,7 @@ function Wave() {
         audioRef.current = new Audio(song);
 
         audioCtxRef.current = new AudioContext();
+
         const track = audioCtxRef.current.createMediaElementSource(
             audioRef.current as HTMLMediaElement // explicitly cast audioRef.current to HTMLMediaElement to avoid type errors
         );
@@ -97,16 +100,15 @@ function Wave() {
         );
         const panner = pannerRef.current;
 
-        // this is a chin track -> volume -> panner -> destination(speakers)
+        // this is a chain so: track -> volume -> panner -> destination(speakers)
         track.connect(volume);
         volume.connect(panner);
         panner.connect(analyser);
         analyser.connect(audioCtxRef.current.destination);
 
-        analyser.fftSize = 32;
+        analyser.fftSize = 64;
         const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        console.log("DATA-ARRAY: ", dataArray); // Check out this array of frequency values!
+        dataArr.current = new Uint8Array(bufferLength);
 
         //source.connect(audioCtxRef.current.destination);
         setSource(track);
@@ -123,6 +125,12 @@ function Wave() {
             // @ts-ignore
             waveMaterial2.current.uTime += state.clock.getElapsedTime();
         }
+
+        if (analyserRef.current) {
+            analyserRef.current.getByteFrequencyData(dataArr.current);
+            console.log("data after getting frequency data:");
+            console.log(dataArr);
+        }
     });
 
     let tubularSegments = 20;
@@ -132,10 +140,6 @@ function Wave() {
 
     return (
         <>
-            {/* <mesh position={[0, 2, 0]}>
-                <boxBufferGeometry args={[10, 0.1,  0.1, 10, 1, 1]} />
-                <waveMaterial key={WaveMaterial.key} ref={waveMaterial} />
-            </mesh> */}
             <mesh>
                 <tubeBufferGeometry
                     args={[

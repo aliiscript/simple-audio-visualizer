@@ -1,19 +1,21 @@
 import type { NextPage } from "next";
 import styled from "styled-components";
 import { useControls } from "leva";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import CanvasLayout from "../components/layout/CanvasLayout";
 import DomLayout from "../components/layout/DomLayout";
-import AudioComponent from "../components/AudioComponent";
 import Overlay from "../components/dom/Overlay";
 import Wave from "../components/canvas/Wave";
+import { suspend } from "suspend-react";
+import Visualizer from "../components/canvas/Visualizer";
+import song from "../audio/icoHeal08.mp3";
+import song2 from "../audio/lastSurprise.mp3";
 
 // dom components go here
 const DOM = ({ ready, set }: any) => {
     return (
         <DomLayout>
-            <AudioComponent />
-            {/* <Overlay ready={ready} set={set} /> */}
+            <Overlay ready={ready} set={set} />
         </DomLayout>
     );
 };
@@ -31,7 +33,10 @@ const R3F = () => {
         <CanvasLayout>
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
-            <Wave />
+            {/* <Wave /> */}
+            <Suspense fallback={null}>
+                <Visualizer position-z={4.5} url={song2} />
+            </Suspense>
         </CanvasLayout>
     );
 };
@@ -42,7 +47,7 @@ const Home: NextPage = () => {
     // set true while i implement visualier
     return (
         <>
-            {true && <R3F />}
+            {ready && <R3F />}
             <DOM ready={ready} set={set} />
         </>
     );

@@ -2,14 +2,11 @@ import * as React from "react";
 import styled from "styled-components";
 import styles from "./Overlay.module.css";
 
-interface FSProps {
-    r: boolean;
-}
+
 
 function Overlay({ ready, set }: any) {
-     
     return (
-        <FullscreenDiv r={ready} style={{ opacity: ready ? 0 : 1 }}>
+        <FullscreenDiv style={{ opacity: ready ? 0 : 1 }}>
             <CenterDiv>
                 <StyledH1>Start Visualizer</StyledH1>
                 <button style={{ cursor: "hand" }} onClick={() => set(true)}>
@@ -20,7 +17,7 @@ function Overlay({ ready, set }: any) {
     );
 }
 
-const FullscreenDiv = styled.div<FSProps>`
+const FullscreenDiv = styled.div`
     position: absolute;
     top: 0;
     left: 0;
