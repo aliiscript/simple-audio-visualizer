@@ -22,12 +22,13 @@ export const WaveMaterial = shaderMaterial(
     // vertex shader
     /*glsl*/ `
       uniform float uTime;
-      uniform float frequencyData;
+      uniform float frequencyData[32];
       varying vec2 vUv;
+      varying float vData;
       void main() {
         vec3 pos = position;
-        float frequency = frequencyData;
-        pos.y += frequency;
+        float frequency = frequencyData[int(pos.x * 32.0)];
+        pos.y += frequency / 100.0;
         vec4 modelPosition = modelMatrix * vec4(pos, 1.0);
         // change modelPosition.y with audio frequencies maybe/data
         //modelPosition.y += sin(modelPosition.x * 5.);
@@ -36,14 +37,16 @@ export const WaveMaterial = shaderMaterial(
         gl_Position = projectionPosition;
         // gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         vUv = uv;
+        vData = frequency;
       }
     `,
     // fragment shader
     /*glsl*/ `
       uniform float uTime;
       varying vec2 vUv;
+      varying float vData;
       void main() {
-        gl_FragColor = vec4(vUv, 0.0, 1.0);
+        gl_FragColor = vec4(vUv, vData, 1.0);
       }
     `
 );
@@ -66,7 +69,7 @@ function Visualizer({
         // i can be thought of as a shaping functon
         // to process it better mentally
         // this loop makes the curve smaller or shorter along x-axis
-        for (let i = 0; i < 5; i += 1) {
+        for (let i = 0; i < 2; i += 1) {
             points.push(new THREE.Vector3(i, 0, 0));
         }
         console.log("The path:");
@@ -104,7 +107,6 @@ function Visualizer({
             analyserRef.current.getByteFrequencyData(data);
             // @ts-ignore
             waveMaterial.current.frequencyData = data;
-            //console.log(data)
         }
 
         let avg = update();
@@ -121,6 +123,9 @@ function Visualizer({
             }
         }
 
+        // console.log(data);
+        // console.log(data.map(normalize(data[data.length - 1], data[0])));
+        
         // Set the hue according to the frequency average
         if (ref.current) {
             // @ts-ignore
@@ -130,7 +135,7 @@ function Visualizer({
         }
     });
 
-    let tubularSegments = 20;
+    let tubularSegments = 100;
     let radius = 0.1;
     let radialSegments = 5;
     let closed = false;
@@ -186,7 +191,7 @@ async function createAudio(url: any) {
     const gain = context.createGain();
 
     // Remove to get volume back
-    gain.gain.setValueAtTime(0, context.currentTime);
+    //gain.gain.setValueAtTime(0, context.currentTime);
 
     // Step 4: create analyzer node to see the data using real time frequency data
     const analyser = context.createAnalyser();
