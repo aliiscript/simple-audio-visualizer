@@ -24,10 +24,10 @@ const DOM = ({ ready, set }: any) => {
 const R3F = () => {
     // Leva's useControl causes the ReactDOM.render warning that shows in the console
     //comment out if u dont want error
-    const { color, hoverColor } = useControls({
-        color: "#c1b61f",
-        hoverColor: "#2d52ad",
-    });
+    // const { color, hoverColor } = useControls({
+    //     color: "#c1b61f",
+    //     hoverColor: "#2d52ad",
+    // });
 
     return (
         <CanvasLayout>

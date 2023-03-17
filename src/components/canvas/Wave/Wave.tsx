@@ -150,7 +150,6 @@ function Wave() {
                         closed,
                     ]}
                 />
-                {/* <meshStandardMaterial color={"#4063be"} wireframe={true} /> */}
                 <waveMaterial key={WaveMaterial.key} ref={waveMaterial} />
             </mesh>
             <mesh position={[0, -2, 0]}>

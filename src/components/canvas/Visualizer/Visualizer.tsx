@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as THREE from "three";
-import { Suspense, useEffect, useRef } from "react";
-import { extend, Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import { extend, useFrame } from "@react-three/fiber";
 import { suspend } from "suspend-react";
 import { shaderMaterial } from "@react-three/drei";
 import { ShaderMaterial } from "three";
@@ -18,13 +18,17 @@ declare global {
 }
 
 export const WaveMaterial = shaderMaterial(
-    { uTime: 0 },
+    { uTime: 0, frequencyData: 0 },
     // vertex shader
     /*glsl*/ `
       uniform float uTime;
+      uniform float frequencyData;
       varying vec2 vUv;
       void main() {
-        vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+        vec3 pos = position;
+        float frequency = frequencyData;
+        pos.y += frequency;
+        vec4 modelPosition = modelMatrix * vec4(pos, 1.0);
         // change modelPosition.y with audio frequencies maybe/data
         //modelPosition.y += sin(modelPosition.x * 5.);
         vec4 viewPosition = viewMatrix * modelPosition;
@@ -55,27 +59,52 @@ function Visualizer({
     obj = new THREE.Object3D(),
     ...props
 }: any) {
+    // Create a curve based on the points
+    const [path, setCurve] = React.useState(() => {
+        // Create an empty array to stores the points
+        let points = [];
+        // i can be thought of as a shaping functon
+        // to process it better mentally
+        // this loop makes the curve smaller or shorter along x-axis
+        for (let i = 0; i < 5; i += 1) {
+            points.push(new THREE.Vector3(i, 0, 0));
+        }
+        console.log("The path:");
+        console.table(points);
+        return new THREE.CatmullRomCurve3(points);
+    });
+
     const ref = useRef<InstancedMesh | null>(null);
     const waveMaterial = useRef<ShaderMaterial>(null);
+    const analyserRef = useRef<AnalyserNode>();
 
     // suspend-react is the library that r3f uses internally for useLoader. It caches promises and
     // integrates them with React suspense. You can use it as-is with or without r3f.
-    const { gain, context, update, data } = suspend(
+    const { gain, context, analyser, update, data } = suspend(
         () => createAudio(url),
         [url]
     );
     useEffect(() => {
+        analyserRef.current = analyser;
         // Connect the gain node, which plays the audio
         gain.connect(context.destination);
         // Disconnect it on unmount
         return () => gain.disconnect();
-    }, [gain, context]);
+    }, [gain, context, analyser]);
+
+    useEffect(() => {
+        console.log(ref.current);
+    });
 
     useFrame((state) => {
-        if (waveMaterial.current) {
+        if (analyserRef.current) {
             // added ignore since Shadermaterial does not have uTime value
             // @ts-ignore
             waveMaterial.current.uTime += state.clock.getElapsedTime();
+            analyserRef.current.getByteFrequencyData(data);
+            // @ts-ignore
+            waveMaterial.current.frequencyData = data;
+            //console.log(data)
         }
 
         let avg = update();
@@ -88,31 +117,49 @@ function Visualizer({
             );
             obj.updateMatrix();
             if (ref.current) {
-              ref.current.setMatrixAt(i, obj.matrix);
+                ref.current.setMatrixAt(i, obj.matrix);
             }
         }
+
         // Set the hue according to the frequency average
         if (ref.current) {
             // @ts-ignore
-            ref.current.material.color.setHSL(avg / 50, 0.75, 0.75);
+            // ref.current.material.color.setHSL(avg / 50, 0.75, 0.75);
             // console.log(avg)
             ref.current.instanceMatrix.needsUpdate = true;
         }
     });
 
-   
+    let tubularSegments = 20;
+    let radius = 0.1;
+    let radialSegments = 5;
+    let closed = false;
 
     return (
-        <instancedMesh
-            castShadow
-            ref={ref}
-            args={[null, null, data.length]}
-            {...props}
-        >
-            <planeGeometry args={[width, height]} />
-            <meshBasicMaterial toneMapped={false} />
-            {/* <waveMaterial key={WaveMaterial.key} ref={waveMaterial} /> */}
-        </instancedMesh>
+        <>
+            <instancedMesh
+                castShadow
+                ref={ref}
+                args={[null, null, data.length]}
+                {...props}
+            >
+                <planeGeometry args={[width, height]} />
+                <meshBasicMaterial />
+                {/* <waveMaterial key={WaveMaterial.key} ref={waveMaterial} /> */}
+            </instancedMesh>
+            <mesh>
+                <tubeBufferGeometry
+                    args={[
+                        path,
+                        tubularSegments,
+                        radius,
+                        radialSegments,
+                        closed,
+                    ]}
+                />
+                <waveMaterial key={WaveMaterial.key} ref={waveMaterial} />
+            </mesh>
+        </>
     );
 }
 
@@ -138,6 +185,9 @@ async function createAudio(url: any) {
     // Create gain node and an analyser
     const gain = context.createGain();
 
+    // Remove to get volume back
+    gain.gain.setValueAtTime(0, context.currentTime);
+
     // Step 4: create analyzer node to see the data using real time frequency data
     const analyser = context.createAnalyser();
     analyser.fftSize = 64;
@@ -150,6 +200,7 @@ async function createAudio(url: any) {
 
     return {
         context,
+        analyser,
         source,
         gain,
         data,
@@ -162,6 +213,13 @@ async function createAudio(url: any) {
                 0
             ));
         },
+    };
+}
+
+function normalize(min: number, max: number) {
+    var delta = max - min;
+    return function (val: number) {
+        return (val - min) / delta;
     };
 }
 
