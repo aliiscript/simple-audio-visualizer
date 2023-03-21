@@ -35,7 +35,7 @@ const R3F = () => {
             <pointLight position={[10, 10, 10]} />
             {/* <Wave /> */}
             <Suspense fallback={null}>
-                <Visualizer position-z={4.5} url={song2} />
+                <Visualizer position-z={.5} url={song2} />
             </Suspense>
         </CanvasLayout>
     );

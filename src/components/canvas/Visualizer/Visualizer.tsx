@@ -28,7 +28,7 @@ export const WaveMaterial = shaderMaterial(
       void main() {
         vec3 pos = position;
         float frequency = frequencyData[int(pos.x * 32.0)];
-        pos.y += frequency / 100.0;
+        pos.y += frequency / 750.0;
         vec4 modelPosition = modelMatrix * vec4(pos, 1.0);
         // change modelPosition.y with audio frequencies maybe/data
         //modelPosition.y += sin(modelPosition.x * 5.);
@@ -46,22 +46,17 @@ export const WaveMaterial = shaderMaterial(
       varying vec2 vUv;
       varying float vData;
       void main() {
-        gl_FragColor = vec4(vUv, vData, 1.0);
+        vec3 color = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), vUv.x);
+
+        vec3 colMix = mix(color, vec3(vData / 1000.0), vUv.x);
+        gl_FragColor = vec4(colMix, 1.0);
       }
     `
 );
 
 extend({ WaveMaterial });
 
-function Visualizer({
-    url,
-    y = 2500,
-    space = 1.25,
-    width = 0.01,
-    height = 0.05,
-    obj = new THREE.Object3D(),
-    ...props
-}: any) {
+function Visualizer({ url }: any) {
     // Create a curve based on the points
     const [path, setCurve] = React.useState(() => {
         // Create an empty array to stores the points
@@ -77,7 +72,6 @@ function Visualizer({
         return new THREE.CatmullRomCurve3(points);
     });
 
-    const ref = useRef<InstancedMesh | null>(null);
     const waveMaterial = useRef<ShaderMaterial>(null);
     const analyserRef = useRef<AnalyserNode>();
 
@@ -95,64 +89,30 @@ function Visualizer({
         return () => gain.disconnect();
     }, [gain, context, analyser]);
 
-    useEffect(() => {
-        console.log(ref.current);
-    });
-
+    let fDataArr = [data.map(normalize(data[data.length - 1], data[0]))];
     useFrame((state) => {
         if (analyserRef.current) {
             // added ignore since Shadermaterial does not have uTime value
             // @ts-ignore
             waveMaterial.current.uTime += state.clock.getElapsedTime();
             analyserRef.current.getByteFrequencyData(data);
+
+            //console.log(data);
             // @ts-ignore
             waveMaterial.current.frequencyData = data;
         }
 
-        let avg = update();
-        // Distribute the instanced planes according to the frequency daza
-        for (let i = 0; i < data.length; i++) {
-            obj.position.set(
-                i * width * space - (data.length * width * space) / 2,
-                data[i] / y,
-                0
-            );
-            obj.updateMatrix();
-            if (ref.current) {
-                ref.current.setMatrixAt(i, obj.matrix);
-            }
-        }
-
-        // console.log(data);
-        // console.log(data.map(normalize(data[data.length - 1], data[0])));
-        
-        // Set the hue according to the frequency average
-        if (ref.current) {
-            // @ts-ignore
-            // ref.current.material.color.setHSL(avg / 50, 0.75, 0.75);
-            // console.log(avg)
-            ref.current.instanceMatrix.needsUpdate = true;
-        }
+        //console.log(data);
     });
 
-    let tubularSegments = 100;
+    let tubularSegments = 1000;
     let radius = 0.1;
-    let radialSegments = 5;
+    let radialSegments = 50;
     let closed = false;
 
     return (
         <>
-            <instancedMesh
-                castShadow
-                ref={ref}
-                args={[null, null, data.length]}
-                {...props}
-            >
-                <planeGeometry args={[width, height]} />
-                <meshBasicMaterial />
-                {/* <waveMaterial key={WaveMaterial.key} ref={waveMaterial} /> */}
-            </instancedMesh>
-            <mesh>
+            <mesh position={[-.5, 0, 0]}>
                 <tubeBufferGeometry
                     args={[
                         path,
@@ -191,7 +151,7 @@ async function createAudio(url: any) {
     const gain = context.createGain();
 
     // Remove to get volume back
-    //gain.gain.setValueAtTime(0, context.currentTime);
+    gain.gain.setValueAtTime(0, context.currentTime);
 
     // Step 4: create analyzer node to see the data using real time frequency data
     const analyser = context.createAnalyser();

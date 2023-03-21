@@ -36,11 +36,11 @@ const CanvasLayout = ({ children }: CanvasLayoutProps) => {
             }}
             // Uncomment when using
             // depth texture in shaders
-            // camera={{
-            //     position: [0, 0, 4],
-            //     near: 0.1,
-            //     far: 100,
-            // }}
+            camera={{
+                position: [.5, .5, 1.5],
+                near: 0.1,
+                far: 100,
+            }}
             /* @ts-ignore */
             onCreated={(state) => state.events.connect(dom.current)}
             // Note: connect to dom so, from what i know, you can still use orbitControls and other features in the future without next canvas within a main dom div
