@@ -1,12 +1,9 @@
 import type { NextPage } from "next";
-import styled from "styled-components";
 import { useControls } from "leva";
 import { useState, Suspense } from "react";
 import CanvasLayout from "../components/layout/CanvasLayout";
 import DomLayout from "../components/layout/DomLayout";
 import Overlay from "../components/dom/Overlay";
-import Wave from "../components/canvas/Wave";
-import { suspend } from "suspend-react";
 import Visualizer from "../components/canvas/Visualizer";
 import song from "../audio/icoHeal08.mp3";
 import song2 from "../audio/lastSurprise.mp3";
@@ -35,7 +32,7 @@ const R3F = () => {
             <pointLight position={[10, 10, 10]} />
             {/* <Wave /> */}
             <Suspense fallback={null}>
-                <Visualizer position-z={.5} url={song2} />
+                <Visualizer position-z={0.5} url={song2} />
             </Suspense>
         </CanvasLayout>
     );
