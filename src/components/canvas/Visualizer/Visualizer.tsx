@@ -1,9 +1,5 @@
 import * as React from "react";
 import * as THREE from "three";
-import { useEffect, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { suspend } from "suspend-react";
-import { ShaderMaterial } from "three";
 import { WaveMaterial } from "../../../materials/WaveMaterial/WaveMaterial";
 
 function Visualizer({ url }: any) {
@@ -23,7 +19,7 @@ function Visualizer({ url }: any) {
     });
 
     let tubularSegments = 1000;
-    let radius = 0.1;
+    let radius = 0.08;
     let radialSegments = 50;
     let closed = false;
 

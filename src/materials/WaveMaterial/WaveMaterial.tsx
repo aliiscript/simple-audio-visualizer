@@ -122,10 +122,3 @@ async function createAudio(url: any) {
         },
     };
 }
-
-function normalize(min: number, max: number) {
-    var delta = max - min;
-    return function (val: number) {
-        return (val - min) / delta;
-    };
-}
